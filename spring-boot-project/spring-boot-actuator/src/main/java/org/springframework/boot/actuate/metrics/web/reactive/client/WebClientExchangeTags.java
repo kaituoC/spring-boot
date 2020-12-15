@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public final class WebClientExchangeTags {
 	 * @return the uri tag
 	 */
 	public static Tag uri(ClientRequest request) {
-		String uri = (String) request.attribute(URI_TEMPLATE_ATTRIBUTE).orElseGet(() -> request.url().getPath());
+		String uri = (String) request.attribute(URI_TEMPLATE_ATTRIBUTE).orElseGet(() -> request.url().toString());
 		return Tag.of("uri", extractPath(uri));
 	}
 
@@ -88,7 +88,7 @@ public final class WebClientExchangeTags {
 		if (response != null) {
 			return Tag.of("status", String.valueOf(response.rawStatusCode()));
 		}
-		else if (throwable != null) {
+		if (throwable != null) {
 			return (throwable instanceof IOException) ? IO_ERROR : CLIENT_ERROR;
 		}
 		return CLIENT_ERROR;

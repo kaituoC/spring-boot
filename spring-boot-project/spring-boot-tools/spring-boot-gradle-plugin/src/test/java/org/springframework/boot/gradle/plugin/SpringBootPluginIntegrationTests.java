@@ -66,23 +66,13 @@ class SpringBootPluginIntegrationTests {
 
 	@DisabledForJreRange(min = JRE.JAVA_13)
 	@Test
-	void succeedWithVersionOfGradle6MatchingWhatIsRequired() {
+	void succeedWithVersionOfGradle5MatchingWhatIsRequired() {
 		this.gradleBuild.gradleVersion("5.6").build();
 	}
 
 	@Test
 	void succeedWithVersionOfGradle6MatchingWithIsRequired() {
 		this.gradleBuild.gradleVersion("6.3").build();
-	}
-
-	@Test
-	void unresolvedDependenciesAreAnalyzedWhenDependencyResolutionFails() throws IOException {
-		createMinimalMainSource();
-		BuildResult result = this.gradleBuild.buildAndFail("compileJava");
-		assertThat(result.getOutput())
-				.contains("During the build, one or more dependencies that were declared without a"
-						+ " version failed to resolve:")
-				.contains("    org.springframework.boot:spring-boot-starter:");
 	}
 
 	private void createMinimalMainSource() throws IOException {

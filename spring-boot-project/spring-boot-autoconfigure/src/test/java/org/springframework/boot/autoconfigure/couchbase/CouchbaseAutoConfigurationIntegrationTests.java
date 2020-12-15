@@ -23,13 +23,15 @@ import com.couchbase.client.core.diagnostics.DiagnosticsResult;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.env.ClusterEnvironment;
-import com.couchbase.client.java.manager.bucket.BucketSettings;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.couchbase.BucketDefinition;
+import org.testcontainers.couchbase.CouchbaseContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.boot.testsupport.testcontainers.DockerImageNames;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,13 +47,13 @@ class CouchbaseAutoConfigurationIntegrationTests {
 	private static final String BUCKET_NAME = "cbbucket";
 
 	@Container
-	static final CouchbaseContainer couchbase = new CouchbaseContainer().withClusterAdmin("spring", "password")
-			.withStartupAttempts(5).withStartupTimeout(Duration.ofMinutes(10))
-			.withNewBucket(BucketSettings.create(BUCKET_NAME));
+	static final CouchbaseContainer couchbase = new CouchbaseContainer(DockerImageNames.couchbase())
+			.withCredentials("spring", "password").withStartupAttempts(5).withStartupTimeout(Duration.ofMinutes(10))
+			.withBucket(new BucketDefinition(BUCKET_NAME).withPrimaryIndex(false));
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
 			.withConfiguration(AutoConfigurations.of(CouchbaseAutoConfiguration.class))
-			.withPropertyValues("spring.couchbase.connection-string:localhost:" + couchbase.getMappedPort(11210),
+			.withPropertyValues("spring.couchbase.connection-string: " + couchbase.getConnectionString(),
 					"spring.couchbase.username:spring", "spring.couchbase.password:password",
 					"spring.couchbase.bucket.name:" + BUCKET_NAME);
 

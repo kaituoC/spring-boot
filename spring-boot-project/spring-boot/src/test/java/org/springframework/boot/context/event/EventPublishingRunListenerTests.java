@@ -25,9 +25,9 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.boot.DefaultBootstrapContext;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.availability.LivenessStateChangedEvent;
-import org.springframework.boot.availability.ReadinessStateChangedEvent;
+import org.springframework.boot.availability.AvailabilityChangeEvent;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.support.StaticApplicationContext;
@@ -42,6 +42,8 @@ import static org.mockito.Mockito.mock;
  * @author Brian Clozel
  */
 class EventPublishingRunListenerTests {
+
+	private DefaultBootstrapContext bootstrapContext = new DefaultBootstrapContext();
 
 	private SpringApplication application;
 
@@ -58,12 +60,12 @@ class EventPublishingRunListenerTests {
 	}
 
 	@Test
-	void shouldPublishLifecyleEvents() {
+	void shouldPublishLifecycleEvents() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		assertThat(this.eventListener.receivedEvents()).isEmpty();
-		this.runListener.starting();
+		this.runListener.starting(this.bootstrapContext);
 		checkApplicationEvents(ApplicationStartingEvent.class);
-		this.runListener.environmentPrepared(null);
+		this.runListener.environmentPrepared(this.bootstrapContext, null);
 		checkApplicationEvents(ApplicationEnvironmentPreparedEvent.class);
 		this.runListener.contextPrepared(context);
 		checkApplicationEvents(ApplicationContextInitializedEvent.class);
@@ -71,9 +73,9 @@ class EventPublishingRunListenerTests {
 		checkApplicationEvents(ApplicationPreparedEvent.class);
 		context.refresh();
 		this.runListener.started(context);
-		checkApplicationEvents(ApplicationStartedEvent.class, LivenessStateChangedEvent.class);
+		checkApplicationEvents(ApplicationStartedEvent.class, AvailabilityChangeEvent.class);
 		this.runListener.running(context);
-		checkApplicationEvents(ApplicationReadyEvent.class, ReadinessStateChangedEvent.class);
+		checkApplicationEvents(ApplicationReadyEvent.class, AvailabilityChangeEvent.class);
 	}
 
 	void checkApplicationEvents(Class<?>... eventClasses) {
